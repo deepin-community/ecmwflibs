@@ -1,0 +1,24 @@
+Source: ecmwflibs
+Section: python
+Priority: optional
+Maintainer: Alastair McKinstry <mckinstry@debian.org>
+Build-Depends: debhelper-compat (= 13), 
+  dh-sequence-python3,
+  python3-all-dev, 
+  python3-setuptools,
+  libeccodes-dev,
+  libmagics++-dev
+Standards-Version: 4.6.0
+Homepage: https://github.com/ecmwf/ecmwflibs/
+Vcs-Browser: https://salsa.debian.org:/science-team/ecmwflib
+Vcs-Git: https://salsa.debian.org:/science-team/ecmwflibs.git -b debian/latest
+
+
+Package: python3-ecmwflibs
+Architecture: any
+Depends: python3, ${shlibs:Depends}, ${python3:Depends}, ${misc:Depends}
+Provides: ${python3:Provides}
+Description:  Python 3 module to discover ECMWF libraries.
+ This module is used by ECMWF python libraries to discover some dependencies.
+ .
+ ECMWF is the European Centre for Medium-Range Weather Forecasts.

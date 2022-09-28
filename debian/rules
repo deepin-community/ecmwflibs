@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+# export DH_VERBOSE=1
+
+export PYBUILD_NAME=ecmwflibs
+
+# magic debhelper rule
+%:
+	dh $@ --buildsystem=pybuild 
+
+override_dh_auto_clean:
+	rm -rf *.egg-info .eggs .pybuild
+
+override_dh_auto_test:
+	@echo bypass test that requiresd pytest-flakes

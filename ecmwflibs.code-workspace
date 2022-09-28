@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../magics-python"
+		},
+		{
+			"path": "../cfgrib"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.make": "makefile",
+			"vector": "cpp"
+		}
+	}
+}
