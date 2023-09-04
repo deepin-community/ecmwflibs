@@ -1,3 +1,9 @@
+ecmwflibs (0.13.3-2deepin) unstable; urgency=medium
+
+  * d/patches/find.patch: exclude findlibs in setup.py
+
+ -- Tianyu Chen <sweetyfish@deepin.org>  Mon, 04 Sep 2023 17:59:56 +0800
+
 ecmwflibs (0.13.3-2) unstable; urgency=medium
 
   * Add misc:Depends to python3-ecmwflibs for debhelper
