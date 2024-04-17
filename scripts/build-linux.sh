@@ -44,6 +44,41 @@ PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/lib/pkgconfig:$PKG_CONFIG_PATH
 PKG_CONFIG_PATH=$TOPDIR/install/lib/pkgconfig:$TOPDIR/install/lib64/pkgconfig:$PKG_CONFIG_PATH
 LD_LIBRARY_PATH=$TOPDIR/install/lib:$TOPDIR/install/lib64:$LD_LIBRARY_PATH
 
+# Build sqlite
+
+[[ -d src/sqlite ]] || git clone --depth 1 $GIT_SQLITE src/sqlite
+
+cd src/sqlite
+./configure \
+	--disable-tcl \
+	--prefix=$TOPDIR/install
+
+
+cd $TOPDIR
+make -C src/sqlite install
+
+# Build proj
+[[ -d src/proj ]] || git clone $GIT_PROJ src/proj
+cd src/proj
+git checkout $PROJ_VERSION
+cd $TOPDIR
+
+mkdir -p build-other/proj
+cd build-other/proj
+
+cmake  \
+    $TOPDIR/src/proj -GNinja  \
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DENABLE_TIFF=0 \
+    -DENABLE_CURL=0 \
+    -DBUILD_TESTING=0 \
+    -DBUILD_PROJSYNC=0 \
+    -DBUILD_SHARED_LIBS=1 \
+    -DCMAKE_INSTALL_PREFIX=$TOPDIR/install
+
+cd $TOPDIR
+cmake --build build-other/proj --target install
+
 [[ -d src/netcdf ]] || git clone  $GIT_NETCDF src/netcdf
 cd src/netcdf
 git checkout $NETCDF_VERSION
@@ -67,7 +102,6 @@ cmake --build build-other/netcdf --target install
 [[ -d src/pixman ]] || git clone --depth 1 $GIT_PIXMAN src/pixman
 cd src/pixman
 meson setup --prefix=$TOPDIR/install \
-    -Dintrospection=disabled \
     -Dwrap_mode=nofallback \
     $TOPDIR/build-other/pixman
 
@@ -75,16 +109,15 @@ cd $TOPDIR
 ninja -C build-other/pixman install
 
 # Build cairo
+# -Dqt=disabled
 
-[[ -d src/cairo ]] || git clone --depth 1 $GIT_CAIRO src/cairo
+[[ -d src/cairo ]] || git clone $GIT_CAIRO src/cairo
 cd src/cairo
+git checkout $CAIRO_VERSION
 meson setup --prefix=$TOPDIR/install \
-    -Dintrospection=disabled \
     -Dwrap_mode=nofallback \
     -Dxlib=disabled \
     -Dxcb=disabled \
-    -Dqt=disabled \
-    -Dgl-backend=disabled \
     $TOPDIR/build-other/cairo
 
 cd $TOPDIR
@@ -97,7 +130,6 @@ ninja -C build-other/cairo install
 mkdir -p build-other/harfbuzz
 cd src/harfbuzz
 meson setup --prefix=$TOPDIR/install \
-    -Dintrospection=disabled \
     -Dwrap_mode=nofallback \
     $TOPDIR/build-other/harfbuzz
 
@@ -110,8 +142,8 @@ ninja -C build-other/harfbuzz install
 
 mkdir -p build-other/fridibi
 cd src/fridibi
+
 meson setup --prefix=$TOPDIR/install \
-    -Dintrospection=disabled \
     -Dwrap_mode=nofallback \
     -Ddocs=false \
     $TOPDIR/build-other/fridibi
@@ -145,32 +177,7 @@ meson setup --prefix=$TOPDIR/install \
 cd $TOPDIR
 ninja -C build-other/pango install
 
-# Build sqlite
 
-[[ -d src/sqlite ]] || git clone --depth 1 $GIT_SQLITE src/sqlite
-
-cd src/sqlite
-./configure \
-	--disable-tcl \
-	--prefix=$TOPDIR/install
-
-
-cd $TOPDIR
-make -C src/sqlite install
-
-# Build proj
-
-[[ -d src/proj ]] || git clone --depth 1 $GIT_PROJ src/proj
-
-cd src/proj
-./autogen.sh
-./configure \
-    --prefix=$TOPDIR/install \
-    --disable-tiff \
-    --with-curl=no
-
-cd $TOPDIR
-make -C src/proj install
 
 # Build eccodes
 
@@ -186,7 +193,7 @@ $TOPDIR/src/ecbuild/bin/ecbuild \
     -DENABLE_MEMFS=1 \
     -DENABLE_INSTALL_ECCODES_DEFINITIONS=0 \
     -DENABLE_INSTALL_ECCODES_SAMPLES=0 \
-    -DCMAKE_INSTALL_PREFIX=$TOPDIR/install
+    -DCMAKE_INSTALL_PREFIX=$TOPDIR/install $ECCODES_EXTRA_CMAKE_OPTIONS
 
 cd $TOPDIR
 cmake --build build-ecmwf/eccodes --target install
@@ -212,6 +219,7 @@ cmake --build build-ecmwf/magics --target install
 lddtree install/lib*/libMagPlus.so
 rm -fr dist wheelhouse ecmwflibs/share
 cp -r install/share ecmwflibs/
+rm -fr ecmwflibs/share/magics/efas
 cp install/lib64/*.so install/lib/
 strip --strip-debug install/lib/*.so
 

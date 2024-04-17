@@ -1,0 +1,8 @@
+#!/usr/bin/python3
+
+import sys
+import ecmwflibs as findlibs
+
+lib = findlibs.find("eccodes")
+if lib is None:
+	sys.exit(1)

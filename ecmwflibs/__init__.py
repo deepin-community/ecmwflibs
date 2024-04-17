@@ -17,7 +17,7 @@ import warnings
 
 from findlibs import find as _find_library
 
-__version__ = "0.3.13"
+__version__ = "0.6.3"
 
 
 _here = os.path.join(os.path.dirname(__file__))
@@ -38,7 +38,6 @@ else:
         print(_fonts, file=_f)
 
     if "ECMWFLIBS_MAGPLUS" not in os.environ:
-
         os.environ["FONTCONFIG_FILE"] = os.environ.get(
             "ECMWFLIBS_FONTCONFIG_FILE", _fontcfg
         )
@@ -48,7 +47,6 @@ else:
         os.environ["MAGPLUS_HOME"] = os.environ.get("ECMWFLIBS_MAGPLUS_HOME", _here)
 
     if "ECMWFLIBS_ECCODES" not in os.environ:
-
         for env in (
             "ECCODES_DEFINITION_PATH",
             "ECCODES_EXTRA_DEFINITION_PATH",
@@ -58,7 +56,6 @@ else:
             "GRIB_SAMPLES_PATH",
         ):
             if env in os.environ:
-                del os.environ[env]
                 if "ECMWFLIBS_" + env in os.environ:
                     os.environ[env] = os.environ["ECMWFLIBS_" + env]
                     warnings.warn(
@@ -66,6 +63,15 @@ else:
                             env, os.environ[env]
                         )
                     )
+                else:
+                    warnings.warn(
+                        (
+                            "ecmwflibs: ignoring provided '{}' set to '{}'. "
+                            "If you want ecmwflibs to use this environment variable, use ECMWFLIBS_{} instead. "
+                            "If you want to use your own ECCODES library, use ECMWFLIBS_ECCODES."
+                        ).format(env, os.environ[env], env)
+                    )
+                    del os.environ[env]
 
     # This comes *after* the variables are set, so c++ has access to them
     try:
@@ -144,7 +150,6 @@ def find(name):
     extension = EXTENSIONS.get(sys.platform, ".so")
 
     for libdir in [here + ".libs", os.path.join(here, ".dylibs"), here]:
-
         if not name.startswith("lib"):
             names = ["lib" + name, name]
         else:
@@ -191,3 +196,10 @@ def credits():
             print(f.read())
 
     print("*" * 80)
+
+
+def builds():
+    here = os.path.dirname(__file__)
+    with open(os.path.join(here, "versions.txt")) as f:
+        for d in f.readlines():
+            print(d)

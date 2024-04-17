@@ -10,30 +10,42 @@
 set -eaux
 uname -a
 
+# HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+HOMEBREW_NO_INSTALL_CLEANUP=1
+
+arch=$(arch)
+[[ $arch == "i386" ]] && arch="x86_64" # GitHub Actions on macOS declare i386
+
+ARCH="arch -$arch"
+
 source scripts/common.sh
 
-brew install cmake ninja pkg-config automake
+brew_home=$(brew config | grep HOMEBREW_PREFIX | sed 's/.* //')
+
+$ARCH brew install cmake ninja pkg-config automake
+
+# brew cat cairo
 
 # We don't want a dependency on X11
-EDITOR=cat brew edit cairo | sed '
-s/^Editing .*//
-s/enable-gobject/disable-gobject/
+brew cat cairo | sed '
+s/xcb=enabled/xcb=disabled/
+s/xlib=enabled/xlib=disabled/
 s/enable-tee/disable-tee/
 s/enable-xcb/disable-xcb/
 s/enable-xlib/disable-xlib/
 s/enable-xlib-xrender/disable-xlib-xrender/
 s/enable-quartz-image/disable-quartz-image/' > cairo.rb
 
-brew install --build-from-source cairo.rb
+cat cairo.rb
 
-EDITOR=cat brew edit pango | sed '
-s/^Editing .*//
-s/introspection=enabled/introspection=disabled/' > pango.rb
+$ARCH brew install pango
+$ARCH brew install netcdf
+$ARCH brew install proj
+$ARCH brew install libaec
 
-brew install --build-from-source pango.rb
 
-brew install netcdf
-brew install proj
+$ARCH brew reinstall --build-from-source --formula cairo.rb
+
 
 for p in  netcdf proj pango cairo
 do
@@ -41,34 +53,37 @@ do
     echo "brew $p $v" >> versions
 done
 
-# -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
-
 # Build eccodes
 
 cd $TOPDIR/build-ecmwf/eccodes
 
-$TOPDIR/src/ecbuild/bin/ecbuild \
+# We disable JASPER because of a linking issue. JPEG support comes from
+# other librarues
+$ARCH $TOPDIR/src/ecbuild/bin/ecbuild \
     $TOPDIR/src/eccodes \
     -GNinja \
+    -DCMAKE_OSX_ARCHITECTURES=$arch \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DENABLE_PYTHON=0 \
     -DENABLE_FORTRAN=0 \
     -DENABLE_BUILD_TOOLS=0 \
+    -DENABLE_JPG_LIBJASPER=0 \
     -DENABLE_MEMFS=1 \
     -DENABLE_INSTALL_ECCODES_DEFINITIONS=0 \
     -DENABLE_INSTALL_ECCODES_SAMPLES=0 \
     -DCMAKE_INSTALL_PREFIX=$TOPDIR/install \
-    -DCMAKE_INSTALL_RPATH=$TOPDIR/install/lib
+    -DCMAKE_INSTALL_RPATH=$TOPDIR/install/lib $ECCODES_EXTRA_CMAKE_OPTIONS
 
 cd $TOPDIR
-cmake --build build-ecmwf/eccodes --target install
+$ARCH cmake --build build-ecmwf/eccodes --target install
 
 # Build magics
 
 cd $TOPDIR/build-ecmwf/magics
-$TOPDIR/src/ecbuild/bin/ecbuild \
+$ARCH $TOPDIR/src/ecbuild/bin/ecbuild \
     $TOPDIR/src/magics \
     -GNinja \
+    -DCMAKE_OSX_ARCHITECTURES=$arch \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DENABLE_PYTHON=0 \
     -DENABLE_FORTRAN=0 \
@@ -78,15 +93,26 @@ $TOPDIR/src/ecbuild/bin/ecbuild \
     -DCMAKE_INSTALL_RPATH=$TOPDIR/install/lib
 
 cd $TOPDIR
-cmake --build build-ecmwf/magics --target install
-
-
+$ARCH cmake --build build-ecmwf/magics --target install
 
 # Create wheel
 rm -fr dist wheelhouse ecmwflibs/share
 mkdir -p install/share/magics
 cp -r install/share ecmwflibs/
-cp -r /usr/local/Cellar/proj/*/share ecmwflibs/
+cp -r $brew_home/Cellar/proj/*/share ecmwflibs/
+rm -fr ecmwflibs/share/proj/*.tif
+rm -fr ecmwflibs/share/proj/*.txt
+rm -fr ecmwflibs/share/proj/*.pol
+rm -fr ecmwflibs/share/magics/efas
+
+# echo "================================================================================"
+# for n in install/lib/*.dylib
+# do
+#     echo $n
+#     ./scripts/libs-macos.py $n
+# done
+# echo "================================================================================"
+
 strip -S install/lib/*.dylib
 
 ./scripts/versions.sh > ecmwflibs/versions.txt

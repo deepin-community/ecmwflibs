@@ -1,16 +1,19 @@
 #!/usr/bin/make -f
 
 # Uncomment this to turn on verbose mode.
-# export DH_VERBOSE=1
+export DH_VERBOSE=1
 
 export PYBUILD_NAME=ecmwflibs
 
 # magic debhelper rule
 %:
-	dh $@ --buildsystem=pybuild 
+	dh $@ --buildsystem=pybuild
 
 override_dh_auto_clean:
-	rm -rf *.egg-info .eggs .pybuild
+	rm -rf *.egg-info .eggs .pybuild build
+	# clean up files we don't want to include
+	-find . -name .gitignore -exec rm {} \;
 
-override_dh_auto_test:
-	@echo bypass test that requiresd pytest-flakes
+override_dh_fixperms:
+	dh_fixperms
+	chrpath -d debian/python3-ecmwflibs/usr/lib/python3/dist-packages/ecmwflibs/_*so

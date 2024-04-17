@@ -7,10 +7,23 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-# set -eaux
+set -eaux
 
-# vcpkg install pango
+for p in netcdf-c[core,netcdf-4,hdf5]
+do
+    echo $p:$WINARCH-windows
+    vcpkg install $p:$WINARCH-windows
+done
 
-# find /c/vcpkg -name cairo.h -print
+cd tests
 
-# find /c/vcpkg -name 'pkg-conf*' -print
+cmake . \
+    -G"NMake Makefiles"  \
+    -DCMAKE_TOOLCHAIN_FILE=/c/vcpkg/scripts/buildsystems/vcpkg.cmake \
+    -DCMAKE_C_COMPILER=cl.exe
+
+cmake --build .
+
+ls -lrt
+
+./open_netcdf test.nc4

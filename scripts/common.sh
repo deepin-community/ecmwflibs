@@ -13,11 +13,14 @@ rm -f versions
 GIT_ECBUILD=https://github.com/ecmwf/ecbuild.git
 ECBUILD_VERSION=master
 
-GIT_ECCODES=https://github.com/b8raoult/eccodes.git
-ECCODES_VERSION=master
+GIT_ECCODES=https://github.com/ecmwf/eccodes.git
+ECCODES_VERSION=2.34.1
+ECCODES_EXTRA_CMAKE_OPTIONS="-DENABLE_PNG=ON -DENABLE_JPG=ON"
 
-GIT_MAGICS=https://github.com/b8raoult/magics.git
+GIT_MAGICS=https://github.com/ecmwf/magics.git
+# MAGICS_VERSION=4.14.2
 MAGICS_VERSION=develop
+
 
 GIT_SQLITE=https://github.com/sqlite/sqlite.git
 SQLITE_VERSION=master
@@ -25,11 +28,14 @@ SQLITE_VERSION=master
 GIT_PROJ=https://github.com/OSGeo/PROJ.git
 PROJ_VERSION=master
 
-GIT_PIXMAN=https://github.com/freedesktop/pixman.git
+GIT_AEC=https://github.com/MathisRosenhauer/libaec.git
+AEC_VERSION=master
+
+GIT_PIXMAN=https://gitlab.freedesktop.org/pixman/pixman
 PIXMAN_VERSION=master
 
-GIT_CAIRO=https://github.com/freedesktop/cairo.git
-CAIRO_VERSION=master
+GIT_CAIRO=https://gitlab.freedesktop.org/cairo/cairo
+CAIRO_VERSION=1.17.6
 
 GIT_HARFBUZZ=https://github.com/harfbuzz/harfbuzz.git
 HARFBUZZ_VERSION=master
@@ -49,10 +55,11 @@ NETCDF_VERSION=${NETCDF_VERSION:=master}
 GIT_HDF5=https://github.com/HDFGroup/hdf5.git
 HDF5_VERSION=${HDF5_VERSION:=hdf5-1_10_5}
 
+rm -fr src build build-ecmwf
 
-[[ -d src/ecbuild ]] || git clone --branch $ECBUILD_VERSION $GIT_ECBUILD src/ecbuild
-[[ -d src/eccodes ]] || git clone --branch $ECCODES_VERSION $GIT_ECCODES src/eccodes
-[[ -d src/magics ]] || git clone --branch $MAGICS_VERSION $GIT_MAGICS src/magics
+git clone --branch $ECBUILD_VERSION $GIT_ECBUILD src/ecbuild
+git clone --branch $ECCODES_VERSION $GIT_ECCODES src/eccodes
+git clone --branch $MAGICS_VERSION $GIT_MAGICS src/magics
 
 mkdir -p build-ecmwf/eccodes
 mkdir -p build-ecmwf/magics
