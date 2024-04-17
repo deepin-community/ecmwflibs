@@ -1,8 +1,114 @@
-ecmwflibs (0.13.3-2deepin) unstable; urgency=medium
+ecmwflibs (2:0.6.3-1) unstable; urgency=medium
 
-  * d/patches/find.patch: exclude findlibs in setup.py
+  * New upstream release
 
- -- Tianyu Chen <sweetyfish@deepin.org>  Mon, 04 Sep 2023 17:59:56 +0800
+ -- Alastair McKinstry <mckinstry@debian.org>  Fri, 08 Mar 2024 06:22:58 +0000
+
+ecmwflibs (2:0.6.1-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Wed, 07 Feb 2024 06:38:27 +0000
+
+ecmwflibs (2:0.6.0-1) unstable; urgency=medium
+
+  * Fix typos in Vcs-Browser
+  * New upstream release
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Sat, 03 Feb 2024 07:24:17 +0000
+
+ecmwflibs (2:0.5.7-4) unstable; urgency=medium
+
+  * Fix for minimal chroots with symlinked /usr (autopkgtest)
+    Closes: #1055848
+  * Add autopkgtest to catch this
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Sat, 20 Jan 2024 19:37:45 +0000
+
+ecmwflibs (2:0.5.7-3) unstable; urgency=medium
+
+  * Rebuild against latest eccodes
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Tue, 02 Jan 2024 18:37:36 +0000
+
+ecmwflibs (2:0.5.7-2) unstable; urgency=medium
+
+  * Add a superficial tryload test for autopkgtest
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Tue, 12 Dec 2023 14:02:15 +0000
+
+ecmwflibs (2:0.5.7-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Fri, 17 Nov 2023 12:09:59 +0000
+
+ecmwflibs (2:0.5.6-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Fri, 03 Nov 2023 09:20:04 +0000
+
+ecmwflibs (2:0.5.4-1) unstable; urgency=medium
+
+  * New upstream release
+  * Standards-Version: 4.6.2
+  * Enabble build after successful build. Closes: #1044204
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Mon, 14 Aug 2023 11:12:49 +0100
+
+ecmwflibs (2:0.5.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * Don't accidentally ship .gitignre files
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Wed, 23 Nov 2022 14:51:11 +0000
+
+ecmwflibs (2:0.4.18~rc9-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Sat, 03 Sep 2022 13:35:30 +0100
+
+ecmwflibs (2:0.4.16-2) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Trim trailing whitespace.
+  * Strip unusual field spacing from debian/control.
+  * Use versioned copyright format URI.
+  * Set upstream metadata fields: Bug-Database, Bug-Submit, Name, Repository,
+    Repository-Browse.
+  * Add debian/watch file, using github.
+  * Fix broken Vcs URL.
+
+  [ Alastair McKinstry ]
+  * Enable tests in debian/rules
+  * Look for libs in multi-arch directories. Closes: #1011768, #1011719
+  * Depend on libeccodes-dev, libmagics++-dev for libraries
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Fri, 27 May 2022 10:11:36 +0100
+
+ecmwflibs (2:0.4.16-1) unstable; urgency=medium
+
+  * New upstream release
+  * Standards-Version: 4.6.1
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Thu, 26 May 2022 10:27:43 +0100
+
+ecmwflibs (2:0.4.14-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Thu, 19 May 2022 09:47:22 +0100
+
+ecmwflibs (2:0.4.10-1) unstable; urgency=medium
+
+  * New upstream release
+  * Use findlibs (now in archive); drop find.patch
+  * Epoch changed to fix numbering error
+  * Ensure runpaths not set
+
+ -- Alastair McKinstry <mckinstry@debian.org>  Fri, 22 Apr 2022 10:32:11 +0100
 
 ecmwflibs (0.13.3-2) unstable; urgency=medium
 

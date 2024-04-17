@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import json
+import re
 import sys
 
 import requests
@@ -28,8 +29,8 @@ ENTRIES = {
         "copying": "https://raw.githubusercontent.com/OSGeo/PROJ/master/COPYING",
     },
     "libpixman": {
-        "home": "https://github.com/freedesktop/pixman",
-        "copying": "https://raw.githubusercontent.com/freedesktop/pixman/master/COPYING",
+        "home": "https://gitlab.freedesktop.org/pixman/pixman",
+        "copying": "https://gitlab.freedesktop.org/pixman/pixman/-/raw/master/COPYING",
     },
     "libfribidi": {
         "home": "https://github.com/fribidi/fribidi",
@@ -69,8 +70,8 @@ ENTRIES = {
         "copying": "https://raw.githubusercontent.com/glennrp/libpng/libpng16/LICENSE",
     },
     "libaec": {
-        "home": "https://github.com/erget/libaec",
-        "copying": "https://raw.githubusercontent.com/erget/libaec/cmake-install-instructions/COPYING",
+        "home": "https://github.com/MathisRosenhauer/libaec",
+        "copying": "https://raw.githubusercontent.com/MathisRosenhauer/libaec/master/LICENSE.txt",
     },
     "libexpat": {
         "home": "https://libexpat.github.io",
@@ -83,18 +84,22 @@ ENTRIES = {
     },
     "libcairo": {
         "home": "https://cairographics.org",
-        "copying": "https://raw.githubusercontent.com/freedesktop/cairo/master/COPYING",
+        "copying": "https://gitlab.freedesktop.org/cairo/cairo/-/raw/master/COPYING",
     },
     "libjasper": {
         "home": "https://github.com/jasper-software/jasper",
-        "copying": "https://raw.githubusercontent.com/jasper-software/jasper/master/LICENSE",
+        "copying": "https://raw.githubusercontent.com/jasper-software/jasper/master/LICENSE.txt",
+    },
+    "libopenjp2": {
+        "home": "https://github.com/uclouvain/openjpeg",
+        "copying": "https://raw.githubusercontent.com/uclouvain/openjpeg/master/LICENSE",
     },
     "libjpeg": {
         "home": "http://ijg.org",
         "copying": "https://jpegclub.org/reference/libjpeg-license/",
         "html": True,
     },
-    "libsz": {
+    "libszip": {
         "home": "https://support.hdfgroup.org/doc_resource/SZIP/",
         "copying": "https://support.hdfgroup.org/doc_resource/SZIP/Commercial_szip.html",
         "html": True,
@@ -117,7 +122,7 @@ ENTRIES = {
     },
     "libtiff": {
         "home": "https://gitlab.com/libtiff/libtiff",
-        "copying": "https://gitlab.com/libtiff/libtiff/-/raw/master/COPYRIGHT",
+        "copying": "https://gitlab.com/libtiff/libtiff/-/raw/master/LICENSE.md",
     },
     # See also https://www.gnu.org/software/gettext/manual/html_node/Discussions.html
     # intl(gettext) is GPL while libintl is LGPL
@@ -140,21 +145,33 @@ ENTRIES = {
         "home": "https://github.com/google/brotli",
         "copying": "https://raw.githubusercontent.com/google/brotli/master/LICENSE",
     },
-    #    "libcurl": {
-    #        "home": "https://github.com/curl/curl",
-    #        "copying": "https://raw.githubusercontent.com/curl/curl/master/COPYING",
-    #    },
+    "libpcre2": {
+        "home": "https://github.com/PCRE2Project/pcre2",
+        "copying": "https://raw.githubusercontent.com/PCRE2Project/pcre2/master/LICENCE",
+    },
+    "libzstd": {
+        "home": "https://github.com/facebook/zstd",
+        "copying": "https://raw.githubusercontent.com/facebook/zstd/master/LICENSE",
+    },
+    # not completely clear what the definitive source for this library is
+    "liblzma": {
+        "home": "https://github.com/ShiftMediaProject/liblzma",
+        "copying": "https://raw.githubusercontent.com/ShiftMediaProject/liblzma/master/COPYING",
+    },
+    # "libcurl": {
+    #     "home": "https://github.com/curl/curl",
+    #     "copying": "https://raw.githubusercontent.com/curl/curl/master/COPYING",
+    # },
+}
+
+PATTERNS = {
+    r"^libpng\d+$": "libpng",
+    r"^libproj(_\d+)+$": "libproj",
 }
 
 ALIASES = {
-    "libpng15": "libpng",
-    "libpng16": "libpng",
     "libbrotlicommon": "libbrotli",
     "libbrotlidec": "libbrotli",
-    "libproj_8_1": "libproj",
-    "libproj_8_0": "libproj",
-    "libproj_7_2": "libproj",
-    "libproj_7_2_1": "libproj",
     "libpangowin32": "libpango",
     "libzlib1": "libz",
     "libeccodes_memfs": "libeccodes",
@@ -164,6 +181,7 @@ ALIASES = {
     "libpangoft2": "libpango",  # Assumed to be part of libpango
     "libpangocairo": "libpango",  # Assumed to be part of libpango
     "libhdf5_hl": "libhdf5",
+    "libsz": "libszip",
 }
 
 if False:
@@ -179,11 +197,18 @@ seen = set()
 
 for line in open(sys.argv[1], "r"):
     lib = "-no-regex-"
-    line = line.strip().split()[-1].split("/")[-1]
-    lib = line.split("-")[0].split(".")[0]
+    lib = line.strip().split("/")[-1]
+    lib = lib.split("-")[0].split(".")[0]
+
+    if lib == "":
+        continue
 
     if not lib.startswith("lib"):
         lib = f"lib{lib}"
+
+    for k, v in PATTERNS.items():
+        if re.match(k, lib):
+            lib = v
 
     lib = ALIASES.get(lib, lib)
 
@@ -209,7 +234,6 @@ for line in open(sys.argv[1], "r"):
 
     with open(f"ecmwflibs/copying/{lib}.txt", "w") as f:
         if copying.startswith("http://") or copying.startswith("https://"):
-
             r = requests.get(copying)
             r.raise_for_status()
             for n in filtering(r.text).split("\n"):

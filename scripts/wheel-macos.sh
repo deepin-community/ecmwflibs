@@ -8,18 +8,40 @@
 # nor does it submit to any jurisdiction.
 
 set -eaux
+echo $PATH
+VERSION=$1
 
-# version=$(echo $1| sed 's/\.//')
+echo $GITHUB_PATH || true
+cat $GITHUB_PATH || true
+python3 --version
+which python3
+which pip3
+# PATH=/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin
+# unset PKG_CONFIG_PATH
 
-pip3 install wheel delocate
+# env | sort
 
-rm -fr dist wheelhouse
+
+
+pip3 install --upgrade pip
+pip3 install wheel delocate setuptools
+
+# https://setuptools.pypa.io/en/latest/userguide/ext_modules.html#cross-platform-compilation
+# Prevent ext_modules from being built as universal
+# CXX=./scripts/cxx-no-arch.sh
+# CC=./scripts/c-no-arch.sh
+
+which python3
+python3 --version
+which delocate-wheel
+
+rm -fr dist wheelhouse tmp
 python3 setup.py bdist_wheel
 
 # Do it twice to get the list of libraries
 
 delocate-wheel -w wheelhouse dist/*.whl
-unzip -l wheelhouse/*.whl | grep 'dylib' > libs
+unzip -l wheelhouse/*.whl | grep 'dylib' >libs
 pip3 install -r tools/requirements.txt
 python3 ./tools/copy-licences.py libs
 

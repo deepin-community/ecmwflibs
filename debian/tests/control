@@ -1,0 +1,3 @@
+Tests: tryload, eccodes-search
+Depends: python3-ecmwflibs
+Restrictions: superficial

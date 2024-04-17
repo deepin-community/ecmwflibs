@@ -1,0 +1,34 @@
+Description: Search for libs in Debian Multiarch directories
+ Updated 2024-01-20 for cases with symlinked-usr and dpkg-architecture
+ breaking in a minimal autopkgtest chroot
+Author: Alastair McKinstry <mckinstry@debian.org>
+Last-Updated: 2024-01-20
+Forwarded: not-needed
+
+--- a/ecmwflibs/__init__.py
++++ b/ecmwflibs/__init__.py
+@@ -14,6 +14,7 @@
+ import sys
+ import tempfile
+ import warnings
++import subprocess
+ 
+ from findlibs import find as _find_library
+ 
+@@ -149,7 +150,15 @@
+     here = os.path.dirname(__file__)
+     extension = EXTENSIONS.get(sys.platform, ".so")
+ 
+-    for libdir in [here + ".libs", os.path.join(here, ".dylibs"), here]:
++
++    st,reply = subprocess.getstatusoutput('dpkg-architecture --query DEB_HOST_MULTIARCH')
++    if st != 0:
++        raise Exception(f"Multiarch check failed for ecmwflibs {reply}")
++    # Hack for  broken output from dpkg-architecture on merged-usr minimal chroots
++    reply = reply.split()[-1]
++    multiarch_lib = f"/usr/lib/{reply.strip()}"
++
++    for libdir in [here + ".libs", os.path.join(here, ".dylibs"), here, multiarch_lib]:
+         if not name.startswith("lib"):
+             names = ["lib" + name, name]
+         else:
